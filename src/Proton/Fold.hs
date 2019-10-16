@@ -6,14 +6,14 @@ import Data.Profunctor
 import Data.Profunctor.Traversing
 import Data.Foldable
 import Data.Functor.Contravariant
+
+import Proton.Getter
+
+
 type Fold r s t a b = Forget r a b -> Forget r s t
 
 folding :: (Foldable f, Traversing p, forall x. Functor (p x), forall x. Contravariant (p x)) => (s -> f a) -> p a b -> p s t
 folding f = to f . folded
-
-to :: (forall x. Contravariant (p x), forall x. Functor (p x), Profunctor p)
-   => (s -> a) -> p a b -> p s t
-to f = phantom . lmap f
 
 folded :: (Foldable f, Traversing p, forall x. Contravariant (p x), forall x. Functor (p x))
        => p a b -> p (f a) (f b)

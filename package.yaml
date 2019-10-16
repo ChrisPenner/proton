@@ -39,6 +39,7 @@ dependencies:
 - base >= 4.7 && < 5
 - profunctors >= 5.4
 - contravariant
+- tagged
 
 library:
   source-dirs: src
