@@ -1,4 +1,4 @@
-module Setter where
+module Proton.Setter where
 
 import Data.Profunctor
 import Data.Profunctor.Rep

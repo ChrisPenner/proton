@@ -40,6 +40,8 @@ dependencies:
 - profunctors >= 5.4
 - contravariant
 - tagged
+- distributive
+- adjunctions
 
 library:
   source-dirs: src

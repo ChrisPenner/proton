@@ -6,6 +6,7 @@ import Data.Profunctor
 import Data.Profunctor.Traversing
 import Data.Foldable
 import Data.Functor.Contravariant
+import Data.Monoid
 
 import Proton.Getter
 
@@ -27,3 +28,9 @@ foldMapOf f into = runForget (f (Forget into))
 
 toListOf :: Fold [a] s t a b -> s -> [a]
 toListOf fld = foldOf (fld . to pure)
+
+preview :: Fold (First a) s t a b -> s -> Maybe a
+preview fld = getFirst . foldMapOf fld (First . Just)
+
+(^?) :: s -> Fold (First a) s t a b -> Maybe a
+(^?) = flip preview
