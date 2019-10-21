@@ -42,6 +42,8 @@ dependencies:
 - tagged
 - distributive
 - adjunctions
+- bifunctors
+- mtl
 
 library:
   source-dirs: src
