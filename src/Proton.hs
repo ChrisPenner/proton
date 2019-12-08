@@ -11,4 +11,5 @@ import Proton.Lens as P
 import Proton.Iso as P
 import Proton.Prisms as P
 import Proton.Kaleidoscope as P
+import Proton.Types as P
 

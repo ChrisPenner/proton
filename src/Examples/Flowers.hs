@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeFamilies #-}
 module Examples.Flowers where
 
 import Proton
@@ -9,6 +10,7 @@ import Data.Foldable
 import Data.List
 import Data.Ord
 import Data.Function
+import Control.Applicative
 
 data Species = Setosa | Versicolor | Virginica
   deriving Show
@@ -16,59 +18,64 @@ data Species = Setosa | Versicolor | Virginica
 -- data Measurements = Measurements [Float]
 --   deriving Show
 
-type Measurements = [Float]
+data Measurements = Measurements {getMeasurements :: [Float]}
+  deriving Show
 
 
-data Flower = Flower {_species :: Species, _measurements :: Measurements}
+data Flower = Flower {species :: Species, measurements :: Measurements}
   deriving Show
 
 measurementDistance :: Measurements -> Measurements -> Float
-measurementDistance xs ys = sum . fmap abs $ zipWith (-) xs ys
-
--- distance :: LensLike f s t a b
--- distance
-
--- measureNearest :: ((Measurements, Measurements) -> f Measurements) -> (Flower, Flower) -> f Flower
--- ListLens((Flower, Flower), (Measurements, Measurements))
+measurementDistance (Measurements xs) (Measurements ys) = sum . fmap abs $ zipWith (-) xs ys
 
 classify :: ([Flower], Measurements) -> Flower
 classify (flowers, m) =
-    let Flower species _ = minimumBy (comparing (measurementDistance m . _measurements)) flowers
+    let Flower species _ = minimumBy (comparing (measurementDistance m . measurements)) flowers
      in Flower species m
 
+-- aggregate :: Kaleidoscope' Measurements Float
+-- aggregate p = cotabulate thingy
+--   where
+--       foldFunc = cosieve p
+--       thingy measurements =
+--           Measurements . getZipList . fmap foldFunc . sequenceA . fmap (ZipList . getMeasurements) $ measurements
+
+aggregate :: Kaleidoscope' Measurements Float
+aggregate = iso getMeasurements Measurements . pointWise
+
+-- measureNearest :: ListLens' Flower Measurements
+-- measureNearest p = cotabulate thingy
+--   where
+--       -- foldFunc :: (Foldable f) => f Measurements -> Measurements
+--       foldFunc = cosieve p
+--       -- thingy :: (Foldable f) => f Flower -> Flower
+--       thingy flowers =
+--           classify (toList flowers, foldFunc (fmap measurements flowers))
+
 measureNearest :: ListLens' Flower Measurements
-measureNearest p = cotabulate thingy
-  where
-      -- foldFunc :: (Foldable f) => f Measurements -> Measurements
-      foldFunc = cosieve p
-      -- thingy :: (Foldable f) => f Flower -> Flower
-      thingy flowers =
-          classify (toList flowers, foldFunc (fmap _measurements flowers))
+measureNearest = listLens measurements classify
 
 flower1 :: Flower
-flower1 = Flower Versicolor [2, 3, 4, 2]
+flower1 = Flower Versicolor (Measurements [2, 3, 4, 2])
 
 flower2 :: Flower
-flower2 = Flower Setosa [5, 4, 3, 2.5]
+flower2 = Flower Setosa (Measurements [5, 4, 3, 2.5])
 
 flowers :: [Flower]
 flowers = [flower1, flower2]
 
-mean :: [Measurements] -> Measurements
-mean = fmap avg . transpose
-  where
-    avg [] = 0
-    avg xs = sum xs / fromIntegral (length xs)
+mean :: [Float] -> Float
+mean [] =  0
+mean xs = sum xs / fromIntegral (length xs)
 
 test :: IO ()
 test = do
     -- We can use a list-lens as a setter over a single element
-    print $ flower1 & measureNearest %~ fmap negate
+    print $ flower1 & measureNearest . aggregate %~ negate
 
     -- We can explicitly compare to a specific result
-    print $ [5, 4, 3, 1] & flowers ?. measureNearest
+    print $ Measurements [5, 4, 3, 1] & flowers ?. measureNearest
 
     -- We can provide an aggregator explicitly
-    print $ mean & (flowers >- measureNearest)
-    print $ flowers & (measureNearest *% mean)
-
+    print $ mean & (flowers >- measureNearest . aggregate)
+    print $ flowers & (measureNearest . aggregate *% mean)
