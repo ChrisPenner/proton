@@ -19,3 +19,7 @@ views g f = f . view g
 
 like :: a -> Getter s t a b
 like = to . const
+
+infixl 8 ^.
+(^.) ::  s -> Optic (Forget a) s t a b -> a
+(^.) = flip view

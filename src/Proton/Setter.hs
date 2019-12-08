@@ -20,3 +20,11 @@ setter f g = dimap f g
 
 mapped :: Functor f => Setter (f a) (f b) a b
 mapped = fmap
+
+infixr 4 %~
+(%~) :: Setter s t a b -> (a -> b) -> s -> t
+(%~) = over
+
+infixr 4 .~
+(.~) :: Setter s t a b -> s -> b -> t
+(.~) = set
