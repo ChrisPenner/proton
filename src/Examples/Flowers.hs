@@ -1,4 +1,5 @@
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module Examples.Flowers where
 
 import Proton
@@ -11,6 +12,7 @@ import Data.List
 import Data.Ord
 import Data.Function
 import Control.Applicative
+import Debug.Trace
 
 data Species = Setosa | Versicolor | Virginica
   deriving Show
@@ -33,27 +35,20 @@ classify (flowers, m) =
     let Flower species _ = minimumBy (comparing (measurementDistance m . measurements)) flowers
      in Flower species m
 
--- aggregate :: Kaleidoscope' Measurements Float
--- aggregate p = cotabulate thingy
---   where
---       foldFunc = cosieve p
---       thingy measurements =
---           Measurements . getZipList . fmap foldFunc . sequenceA . fmap (ZipList . getMeasurements) $ measurements
-
 aggregate :: Kaleidoscope' Measurements Float
 aggregate = iso getMeasurements Measurements . pointWise
 
--- measureNearest :: ListLens' Flower Measurements
--- measureNearest p = cotabulate thingy
---   where
---       -- foldFunc :: (Foldable f) => f Measurements -> Measurements
---       foldFunc = cosieve p
---       -- thingy :: (Foldable f) => f Flower -> Flower
---       thingy flowers =
---           classify (toList flowers, foldFunc (fmap measurements flowers))
-
 measureNearest :: ListLens' Flower Measurements
 measureNearest = listLens measurements classify
+
+-- strained :: forall s b. ListLens s [s] s Bool
+-- strained = listLens id go
+--   where
+--     -- go :: ([s], [Bool]) -> [s]
+--     -- go  = fmap fst . filter snd . uncurry zip
+--     go  (x, True)  = x
+--     go  (x, False) = []
+
 
 flower1 :: Flower
 flower1 = Flower Versicolor (Measurements [2, 3, 4, 2])
@@ -71,11 +66,15 @@ mean xs = sum xs / fromIntegral (length xs)
 test :: IO ()
 test = do
     -- We can use a list-lens as a setter over a single element
-    print $ flower1 & measureNearest . aggregate %~ negate
+    -- print $ flower1 & measureNearest . aggregate %~ negate
 
-    -- We can explicitly compare to a specific result
-    print $ Measurements [5, 4, 3, 1] & flowers ?. measureNearest
+    -- -- We can explicitly compare to a specific result
+    -- print $ Measurements [5, 4, 3, 1] & flowers ?. measureNearest
+    -- print $ Measurements [5, 4, 3, 1] & measureNearest .* flowers
 
-    -- We can provide an aggregator explicitly
-    print $ mean & (flowers >- measureNearest . aggregate)
-    print $ flowers & (measureNearest . aggregate *% mean)
+    -- -- We can provide an aggregator explicitly
+    -- print $ mean & (flowers >- measureNearest . aggregate)
+    -- print $ flowers & (measureNearest . aggregate *% mean)
+    print $ flowers & (measureNearest . aggregate *% maximum)
+
+    -- print $ [[1, 2, 3], [3, 4, 5]] & convolving *% mean

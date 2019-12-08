@@ -33,10 +33,12 @@ infixr 4 >-
 (>-) :: f s -> Optic (Costar f) s t a b -> (f a -> b) -> t
 (>-) xs opt aggregator = (runCostar $ opt (Costar aggregator)) xs
 
+-- ListLens s t a b -> (f a -> b) -> f s -> t
 infixr 4 *%
 (*%) :: Optic (Costar f) s t a b -> (f a -> b) -> f s -> t
 (*%) opt aggregator xs = (runCostar $ opt (Costar aggregator)) xs
 
+-- ListLens s t a b -> f s -> b -> t
 infixr 4 .*
 (.*) :: Optic (Costar f) s t a b -> f s -> b -> t
 (.*) opt xs b = (runCostar $ opt (Costar (const b))) xs
