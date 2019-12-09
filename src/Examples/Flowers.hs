@@ -5,6 +5,7 @@ module Examples.Flowers where
 import Proton
 
 import Data.Profunctor.Rep
+import Data.Profunctor.Strong
 import Data.Profunctor.Sieve
 import Data.Foldable
 
@@ -30,13 +31,19 @@ data Flower = Flower {species :: Species, measurements :: Measurements}
 measurementDistance :: Measurements -> Measurements -> Float
 measurementDistance (Measurements xs) (Measurements ys) = sum . fmap abs $ zipWith (-) xs ys
 
-classify :: ([Flower], Measurements) -> Flower
+classify :: Foldable f => (f Flower, Measurements) -> Flower
 classify (flowers, m) =
     let Flower species _ = minimumBy (comparing (measurementDistance m . measurements)) flowers
      in Flower species m
 
+-- aggregate :: Kaleidoscope' Measurements Float
 aggregate :: Kaleidoscope' Measurements Float
 aggregate = iso getMeasurements Measurements . pointWise
+
+-- measureLens :: Lens' Measurements [Float]
+-- measureLens = lens getMeasurements setter
+--   where
+--     setter _ b = Measurements b
 
 measureNearest :: ListLens' Flower Measurements
 measureNearest = listLens measurements classify
@@ -76,5 +83,4 @@ test = do
     -- print $ mean & (flowers >- measureNearest . aggregate)
     -- print $ flowers & (measureNearest . aggregate *% mean)
     print $ flowers & (measureNearest . aggregate *% maximum)
-
     -- print $ [[1, 2, 3], [3, 4, 5]] & convolving *% mean

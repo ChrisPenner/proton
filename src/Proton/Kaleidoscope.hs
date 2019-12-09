@@ -52,7 +52,10 @@ cartesian = convolving
 convolving :: forall f a b. Applicative f => Kaleidoscope (f a) (f b) a b
 convolving p = cotabulate (fmap (cosieve p) . sequenceA)
 
-listLens :: (s -> a) -> (([s], b) -> t) -> ListLens s t a b
+listLens :: (Corepresentable p, Corep p ~ f)
+         => (s -> a)
+         -> ((f s, b) -> t)
+         -> Optic p s t a b
 listLens project flatten p = cotabulate run
   where
-      run s = flatten (toList s, cosieve p (project <$> s))
+      run s = flatten (s, cosieve (lmap project p) s)
