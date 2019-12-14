@@ -14,27 +14,28 @@ import Data.Ord
 import Data.Function
 import Control.Applicative
 import Debug.Trace
+import Data.Functor.Identity
+import Data.Profunctor.Applying
+import Data.Profunctor
 
 data Species = Setosa | Versicolor | Virginica
   deriving Show
 
--- data Measurements = Measurements [Float]
---   deriving Show
-
 data Measurements = Measurements {getMeasurements :: [Float]}
   deriving Show
 
-
-data Flower = Flower {species :: Species, measurements :: Measurements}
+data Flower = Flower {flowerSpecies :: Species, flowerMeasurements :: Measurements}
   deriving Show
 
-measurementDistance :: Measurements -> Measurements -> Float
-measurementDistance (Measurements xs) (Measurements ys) = sum . fmap abs $ zipWith (-) xs ys
+-- measurements' :: p [Float] [Float] -> p Measurements Measurements
+-- measurements' :: Lens' Measurements [Float]
+-- measurements' p =
 
-classify :: Foldable f => (f Flower, Measurements) -> Flower
-classify (flowers, m) =
-    let Flower species _ = minimumBy (comparing (measurementDistance m . measurements)) flowers
-     in Flower species m
+measurementDistance :: Measurements -> Measurements -> Float
+measurementDistance (Measurements xs) (Measurements ys) =
+    sqrt . sum $ zipWith diff xs ys
+  where
+    diff a b = (a - b) ** 2
 
 -- aggregate :: Kaleidoscope' Measurements Float
 aggregate :: Kaleidoscope' Measurements Float
@@ -45,8 +46,13 @@ aggregate = iso getMeasurements Measurements . pointWise
 --   where
 --     setter _ b = Measurements b
 
-measureNearest :: ListLens' Flower Measurements
-measureNearest = listLens measurements classify
+classify :: ([Flower], Measurements) -> Flower
+classify (flowers, m) =
+    let Flower species _ = minimumBy (comparing (measurementDistance m . flowerMeasurements)) flowers
+     in Flower species m
+
+measurements :: Algebraic p => Optic' p Flower Measurements
+measurements = algebraic flowerMeasurements classify
 
 -- strained :: forall s b. ListLens s [s] s Bool
 -- strained = listLens id go
@@ -70,17 +76,29 @@ mean :: [Float] -> Float
 mean [] =  0
 mean xs = sum xs / fromIntegral (length xs)
 
+infixr 4 >--
+(>--) :: [s] -> Optic (Costar []) s t a a -> t
+(>--) xs opt = (runCostar $ opt (Costar head)) xs
+
+aggregateWith :: Functor f => (f Float -> Float) -> Optic (Costar []) Measurements Measurements Float Float
+aggregateWith aggregator p = Costar (Measurements . fmap (cosieve p) . transpose . fmap getMeasurements)
+
 test :: IO ()
 test = do
+    -- print $ (flowers >-- (measurements . aggregateWith mean))
     -- We can use a list-lens as a setter over a single element
-    -- print $ flower1 & measureNearest . aggregate %~ negate
+    print $ flower1 & measurements . aggregate %~ negate
 
     -- -- We can explicitly compare to a specific result
-    -- print $ Measurements [5, 4, 3, 1] & flowers ?. measureNearest
-    -- print $ Measurements [5, 4, 3, 1] & measureNearest .* flowers
+    -- print $ (flowers !! 1) ^. measurements
+    -- print $ (flowers ?. measurements) $ Measurements [5, 4, 3, 1]
+    -- print $ Measurements [5, 4, 3, 1] & (measurements .* flowers)
+    -- print $ Measurements [5, 4, 3, 1] & measurements .* flowers
 
     -- -- We can provide an aggregator explicitly
-    -- print $ mean & (flowers >- measureNearest . aggregate)
-    -- print $ flowers & (measureNearest . aggregate *% mean)
-    print $ flowers & (measureNearest . aggregate *% maximum)
-    -- print $ [[1, 2, 3], [3, 4, 5]] & convolving *% mean
+    print $ mean & (flowers >- measurements . aggregate)
+    -- print $ flowers & (measurements . aggregate *% mean)
+    -- print $ flowers & (measurements . aggregate *% mean)
+    -- print $ flowers & (measurements . aggregate *% maximum)
+    -- print $ [[1, 2, 3], [1, 2, 3], [1, 2, 3]] & convolving *% id
+    --

@@ -11,6 +11,7 @@ newtype Zipping a b = Zipping (a -> a -> b)
 
 grate :: (((s -> a) -> b) -> t) -> Grate s t a b
 grate g = dimap (&) g . closed
+
 -- cotraversed :: forall f a b. Distributive f => Grate (f a) (f b) a b
 -- zipWithOf :: Grate s t a b -> (a -> a -> b) -> s -> s -> t
 -- zipFWithOf :: forall f s t a b. Optic (Costar f) s t a b -> (f a -> b) -> (f s -> t)

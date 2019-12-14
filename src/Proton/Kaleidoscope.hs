@@ -2,10 +2,14 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module Proton.Kaleidoscope where
 
+-- ala http://events.cs.bham.ac.uk/syco/strings3-syco5/slides/roman.pdf
+-- https://cs.ttu.ee/events/nwpt2019/abstracts/paper14.pdf
+
 import Data.Profunctor
 import Data.Profunctor.Sieve
 import Data.Profunctor.Strong
 import Proton.Types
+import Proton.Lens
 import Data.Profunctor.Rep
 
 
@@ -16,9 +20,11 @@ import Data.Profunctor
 import Data.Profunctor.Sieve
 import Data.Profunctor.Rep
 import Data.Foldable
+import Data.Profunctor.Applying
+import Data.Profunctor.Algebraic
 
 
-type ListLens s t a b = forall p. (Foldable (Corep p),  Corepresentable p) => p a b -> p s t
+type ListLens s t a b = forall p. Algebraic p => p a b -> p s t
 type ListLens' s a = ListLens s s a a
 
 type Kaleidoscope s t a b = forall p. (Traversable (Corep p),  Corepresentable p) => p a b -> p s t
@@ -52,10 +58,17 @@ cartesian = convolving
 convolving :: forall f a b. Applicative f => Kaleidoscope (f a) (f b) a b
 convolving p = cotabulate (fmap (cosieve p) . sequenceA)
 
-listLens :: (Corepresentable p, Corep p ~ f)
-         => (s -> a)
-         -> ((f s, b) -> t)
-         -> Optic p s t a b
-listLens project flatten p = cotabulate run
-  where
-      run s = flatten (s, cosieve (lmap project p) s)
+-- convolvingOf :: forall f a b. Applicative f => (Lens' (f a) a) -> Kaleidoscope' (f a) a
+-- convolvingOf l p = cotabulate (\tf -> _ tf . cosieve p . fmap (view l) $ tf)
+
+-- pointWiseOf :: ([a] -> a) -> Kaleidoscope' [a] a
+-- pointWiseOf pick = dimap ZipList getZipList . convolvingOf (pick . getZipList)
+
+-- collapse :: forall p f a b c g. (Traversable g, Applicative g, Alternative f, Corepresentable p, Corep p ~ g)
+--         => Optic' p (f a) a
+-- collapse p = cotabulate done
+--   where
+--     func :: g (f a) -> (f a)
+--     func = cosieve (convolving p)
+--     done :: g (f a) -> f a
+--     done = func . pure @g . asum

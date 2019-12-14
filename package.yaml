@@ -45,6 +45,9 @@ dependencies:
 - bifunctors
 - mtl
 - containers
+- linear
+- tagged
+- comonad
 
 library:
   source-dirs: src

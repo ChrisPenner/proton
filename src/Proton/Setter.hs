@@ -26,5 +26,5 @@ infixr 4 %~
 (%~) = over
 
 infixr 4 .~
-(.~) :: Setter s t a b -> s -> b -> t
-(.~) = set
+(.~) :: Setter s t a b -> b -> s -> t
+(.~) l b s = set l s b
