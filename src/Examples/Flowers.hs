@@ -16,6 +16,7 @@ import Control.Applicative
 import Debug.Trace
 import Data.Functor.Identity
 import Data.Profunctor.Applying
+import Data.Profunctor.Algebraic
 import Data.Profunctor
 
 data Species = Setosa | Versicolor | Virginica
@@ -99,6 +100,6 @@ test = do
     print $ mean & (flowers >- measurements . aggregate)
     -- print $ flowers & (measurements . aggregate *% mean)
     -- print $ flowers & (measurements . aggregate *% mean)
-    -- print $ flowers & (measurements . aggregate *% maximum)
+    print $ flowers & (measurements . aggregate *% maximum)
     -- print $ [[1, 2, 3], [1, 2, 3], [1, 2, 3]] & convolving *% id
     --

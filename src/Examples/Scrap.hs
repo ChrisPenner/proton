@@ -7,6 +7,7 @@ import Data.List
 import Data.Profunctor.Distributing
 import Data.Profunctor.Algebraic
 import Data.Profunctor.Closed
+import Data.Profunctor.Rep
 import Debug.Trace
 
 data Species = Setosa | Versicolor | Virginica
@@ -27,9 +28,8 @@ classify (flowers, m) =
     let Flower species _ = minimumBy (comparing (measurementDistance m . measurements)) flowers
      in Flower species m
 
--- aggregate :: Kaleidoscope' Measurements Float
-aggregate :: Closed p => Optic' p Measurements Float
-aggregate = iso getMeasurements Measurements . distribute'
+aggregate :: (Corepresentable p, Traversable (Corep p), Closed p) => Optic' p Measurements Float
+aggregate = iso getMeasurements Measurements . convolving
 
 measureNearest :: Algebraic p => Optic' p Flower Measurements
 measureNearest = algebraic measurements classify
@@ -41,7 +41,7 @@ flower2 :: Flower
 flower2 = Flower Setosa (Measurements (V4 5 4 3 2.5))
 
 flowers :: [Flower]
-flowers = [flower1, flower2]
+flowers = [flower1, flower2, flower1]
 
 mean :: [Float] -> Float
 mean [] =  0
@@ -59,7 +59,7 @@ test = do
     -- -- We can provide an aggregator explicitly
     -- print $ mean & (flowers >- measureNearest . aggregate)
     -- print $ flowers & (measureNearest . aggregate *% mean)
-    -- print $ flowers & measureNearest . aggregate *% maximum
-    print $ flower1 & measureNearest . aggregate %~ (+10)
+    print $ flowers & measureNearest . aggregate *% maximum . traceShowId
+    -- print $ flower1 & measureNearest . aggregate %~ (+10)
     -- print $ flower1 ^. measureNearest . aggregate
     -- print $ [[1, 2, 3], [3, 4, 5]] & convolving *% mean
