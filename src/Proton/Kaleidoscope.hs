@@ -24,12 +24,8 @@ import Data.Profunctor.Applying
 import Data.Profunctor.Algebraic
 
 
-type ListLens s t a b = forall p. Algebraic p => p a b -> p s t
-type ListLens' s a = ListLens s s a a
-
 type Kaleidoscope s t a b = forall p. (Traversable (Corep p),  Corepresentable p) => p a b -> p s t
 type Kaleidoscope' s a = Kaleidoscope s s a a
-
 
 infixr 4 ?.
 (?.) :: (Foldable f) => f s -> Optic (Costar f) s t a b -> b -> t

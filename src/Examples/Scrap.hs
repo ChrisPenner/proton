@@ -9,6 +9,10 @@ import Data.Profunctor.Algebraic
 import Data.Profunctor.Closed
 import Data.Profunctor.Rep
 import Debug.Trace
+import qualified Data.Map as M
+import Data.Distributive
+import Control.Applicative
+import Data.Functor.Identity
 
 data Species = Setosa | Versicolor | Virginica
   deriving Show
@@ -31,8 +35,8 @@ classify (flowers, m) =
 aggregate :: (Corepresentable p, Traversable (Corep p), Closed p) => Optic' p Measurements Float
 aggregate = iso getMeasurements Measurements . convolving
 
-measureNearest :: Algebraic p => Optic' p Flower Measurements
-measureNearest = algebraic measurements classify
+measureNearest :: forall f p. Foldable f => Algebraic f p => Optic' p Flower Measurements
+measureNearest = algebraic measurements (classify @f)
 
 flower1 :: Flower
 flower1 = Flower Versicolor (Measurements (V4 2 3 4 2))
@@ -47,6 +51,9 @@ mean :: [Float] -> Float
 mean [] =  0
 mean xs = sum xs / fromIntegral (length xs)
 
+compVectors :: (Applicative f, Algebraic f p) => Optic p Int (f Int) Int (f Int)
+compVectors = algebraic id (uncurry $ liftA2 (+))
+
 test :: IO ()
 test = do
     -- We can use a list-lens as a setter over a single element
@@ -59,7 +66,8 @@ test = do
     -- -- We can provide an aggregator explicitly
     -- print $ mean & (flowers >- measureNearest . aggregate)
     -- print $ flowers & (measureNearest . aggregate *% mean)
-    print $ flowers & measureNearest . aggregate *% maximum . traceShowId
+    -- print $ flowers & measureNearest . aggregate *% maximum . traceShowId
+    print . sequenceA $ [V2 1 2, V2 10 20, V2 100 200] & distribute' . compVectors *% const [2, 3, 4]
     -- print $ flower1 & measureNearest . aggregate %~ (+10)
     -- print $ flower1 ^. measureNearest . aggregate
     -- print $ [[1, 2, 3], [3, 4, 5]] & convolving *% mean

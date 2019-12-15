@@ -47,13 +47,13 @@ aggregate = iso getMeasurements Measurements . pointWise
 --   where
 --     setter _ b = Measurements b
 
-classify :: ([Flower], Measurements) -> Flower
+classify :: Foldable f => (f Flower, Measurements) -> Flower
 classify (flowers, m) =
     let Flower species _ = minimumBy (comparing (measurementDistance m . flowerMeasurements)) flowers
      in Flower species m
 
-measurements :: Algebraic p => Optic' p Flower Measurements
-measurements = algebraic flowerMeasurements classify
+measurements :: forall f p. Foldable f => Algebraic f p => Optic' p Flower Measurements
+measurements = algebraic flowerMeasurements (classify @f)
 
 -- strained :: forall s b. ListLens s [s] s Bool
 -- strained = listLens id go
