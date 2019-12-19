@@ -1,67 +1,21 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-module Proton.Kaleidoscope where
+module Proton.Kaleidoscope (Reflector(..), Kaleidoscope, Kaleidoscope') where
 
 -- ala http://events.cs.bham.ac.uk/syco/strings3-syco5/slides/roman.pdf
 -- https://cs.ttu.ee/events/nwpt2019/abstracts/paper14.pdf
 
 import Data.Profunctor
-import Data.Profunctor.Sieve
-import Data.Profunctor.Strong
 import Proton.Types
-import Proton.Lens
 import Data.Profunctor.Rep
-
-
 import Control.Applicative
-import Data.Ord
-import Data.List
-import Data.Profunctor
-import Data.Profunctor.Sieve
-import Data.Profunctor.Rep
-import Data.Foldable
-import Data.Profunctor.MStrong
 import Data.Profunctor.Reflector
-
 
 type Kaleidoscope s t a b = forall p. Reflector p => p a b -> p s t
 type Kaleidoscope' s a = Kaleidoscope s s a a
 
 pointWise :: Kaleidoscope [a] [b] a b
 pointWise = dimap ZipList getZipList . reflected
-
--- infixr 4 ?.
--- (?.) :: (Foldable f) => f s -> Optic (Costar f) s t a b -> b -> t
--- (?.) xs f a = (runCostar $ f (Costar (const a))) xs
-
-infixr 4 ?-
-(?-) :: Optic (Costar f) s t a b -> b -> f s -> t
-(?-) opt b xs = (runCostar $ opt (Costar (const b))) xs
-
--- infixr 4 >-
--- (>-) :: f s -> Optic (Costar f) s t a b -> (f a -> b) -> t
--- (>-) xs opt aggregator = (runCostar $ opt (Costar aggregator)) xs
-
-
-infixr 4 >-
-(>-) :: Optic (Costar f) s t a b -> (f a -> b) -> f s -> t
-(>-) opt aggregator xs = (runCostar $ opt (Costar aggregator)) xs
-
--- ListLens s t a b -> (f a -> b) -> f s -> t
-infixr 4 *%
-(*%) :: Optic (Costar f) s t a b -> (f a -> b) -> f s -> t
-(*%) opt aggregator xs = (runCostar $ opt (Costar aggregator)) xs
-
--- ListLens s t a b -> f s -> b -> t
-infixr 4 .*
-(.*) :: Optic (Costar f) s t a b -> f s -> b -> t
-(.*) opt xs b = (runCostar $ opt (Costar (const b))) xs
-
--- convolvingOf :: forall f a b. Applicative f => (Lens' (f a) a) -> Kaleidoscope' (f a) a
--- convolvingOf l p = cotabulate (\tf -> _ tf . cosieve p . fmap (view l) $ tf)
-
--- pointWiseOf :: ([a] -> a) -> Kaleidoscope' [a] a
--- pointWiseOf pick = dimap ZipList getZipList . convolvingOf (pick . getZipList)
 
 -- collapse :: forall p f a b c g. (Traversable g, Applicative g, Alternative f, Corepresentable p, Corep p ~ g)
 --         => Optic' p (f a) a

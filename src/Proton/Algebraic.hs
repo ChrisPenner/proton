@@ -1,4 +1,4 @@
-module Proton.Algebraic where
+module Proton.Algebraic (MStrong(..), AlgebraicLens, AlgebraicLens', algebraic, listLens, altLens, (>-), (?.)) where
 
 import Data.Profunctor
 import Data.Profunctor.MStrong
@@ -27,3 +27,12 @@ listLens = algebraic pure
 
 altLens :: (Alternative f, MStrong p) => (s -> a) -> (f s -> b -> t) -> Optic p s t a b
 altLens project flatten = algebraic (Alt . pure)  project (flatten . getAlt)
+
+infixr 4 ?.
+(?.) :: Optic (Costar f) s t a b -> b -> f s -> t
+(?.) opt b xs = (runCostar $ opt (Costar (const b))) xs
+
+infixr 4 >-
+(>-) :: Optic (Costar f) s t a b -> (f a -> b) -> f s -> t
+(>-) opt aggregator xs = (runCostar $ opt (Costar aggregator)) xs
+
