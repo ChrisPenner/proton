@@ -1,6 +1,6 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FunctionalDependencies #-}
-module Data.Profunctor.Algebraic where
+module Data.Profunctor.MStrong where
 
 import Data.Profunctor
 import Data.Tagged
@@ -16,9 +16,6 @@ import Data.Monoid
 import Data.Distributive
 import Data.Tuple
 import Proton.Types
-
-type AlgebraicLens s t a b = forall p. MStrong p => p a b -> p s t
-type AlgebraicLens' s a = AlgebraicLens s s a a
 
 class Profunctor p => MStrong p where
   mfirst' ::  Monoid m => p a b -> p (a, m) (b, m)
@@ -45,20 +42,3 @@ instance Traversable f => MStrong (Costar f) where
     where
       go f fma = f <$> sequenceA fma
 
-algebraic :: forall m p s t a b
-           . (Monoid m,  MStrong p)
-           => (s -> m)
-           -> (s -> a)
-           -> (m -> b -> t)
-           -> Optic p s t a b
-algebraic inject project flatten p
-  = dimap (inject &&& id)  (uncurry flatten) $  strengthened
-  where
-    strengthened :: p (m, s) (m, b)
-    strengthened = msecond' (lmap project p)
-
-listLens :: MStrong p => (s -> a) -> ([s] -> b -> t) -> Optic p s t a b
-listLens = algebraic pure
-
-altLens :: (Alternative f, MStrong p) => (s -> a) -> (f s -> b -> t) -> Optic p s t a b
-altLens project flatten = algebraic (Alt . pure)  project (flatten . getAlt)

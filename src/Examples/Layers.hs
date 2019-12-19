@@ -5,7 +5,8 @@ module Examples.Layers where
 import Proton
 import Data.Profunctor
 import Data.Profunctor.Rep
-import Data.Profunctor.Algebraic
+import Data.Profunctor.MStrong
+import Proton.Algebraic
 import qualified Data.Map as M
 import Data.Foldable
 import Data.Maybe
@@ -29,8 +30,8 @@ forward f = lmap f
 back :: Profunctor p => (x -> t) -> Optic p s t s x
 back f = rmap f
 
-lookup'er :: Eq a => Algebraic p => Optic p (a, b) (a, Maybe b) a a
-lookup'er = algebraic fst (\(xs, i) -> (i, lookup i xs))
+lookup'er :: Eq a => AlgebraicLens (a, b) (a, Maybe b) a a
+lookup'er = listLens fst (\xs i -> (i, lookup i xs))
 
 test :: IO ()
 test = do

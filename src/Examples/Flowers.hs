@@ -16,8 +16,7 @@ import Data.Function
 import Control.Applicative
 import Debug.Trace
 import Data.Functor.Identity
-import Data.Profunctor.Applying
-import Data.Profunctor.Algebraic
+import Proton.Algebraic
 import Data.Profunctor
 
 data Species = Setosa | Versicolor | Virginica
@@ -60,7 +59,7 @@ classify flowers m
 -- measurements :: (Corepresentable p, Foldable (Corep p)) => Optic' p Flower Measurements
 -- measurements = listLens flowerMeasurements classify
 
-measurements :: MStrong p => Optic p Flower (Maybe Flower) Measurements Measurements
+measurements :: AlgebraicLens Flower (Maybe Flower) Measurements Measurements
 measurements = listLens flowerMeasurements classify
 
 -- strained :: forall s b. ListLens s [s] s Bool

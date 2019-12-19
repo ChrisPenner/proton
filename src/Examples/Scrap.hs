@@ -5,7 +5,7 @@ import Proton
 import Data.Ord
 import Data.List
 import Data.Profunctor.Distributing
-import Data.Profunctor.Algebraic
+import Proton.Algebraic
 import Data.Profunctor.Closed
 import Data.Profunctor.Rep
 import Debug.Trace
@@ -13,6 +13,7 @@ import qualified Data.Map as M
 import Data.Distributive
 import Control.Applicative
 import Data.Functor.Identity
+import Data.Profunctor.Reflector
 
 data Species = Setosa | Versicolor | Virginica
   deriving Show
@@ -27,16 +28,16 @@ data Flower = Flower {species :: Species, measurements :: Measurements}
 measurementDistance :: Measurements -> Measurements -> Float
 measurementDistance (Measurements xs) (Measurements ys) = sum . abs $  xs - ys
 
-classify :: Foldable f => (f Flower, Measurements) -> Flower
-classify (flowers, m) =
+classify :: Foldable f => f Flower -> Measurements -> Flower
+classify flowers m =
     let Flower species _ = minimumBy (comparing (measurementDistance m . measurements)) flowers
      in Flower species m
 
-aggregate :: (Corepresentable p, Traversable (Corep p), Closed p) => Optic' p Measurements Float
-aggregate = iso getMeasurements Measurements . convolving
+aggregate :: Kaleidoscope' Measurements Float
+aggregate = iso getMeasurements Measurements . reflected
 
-measureNearest :: forall f p. Foldable f => Algebraic f p => Optic' p Flower Measurements
-measureNearest = algebraic measurements (classify @f)
+measureNearest :: AlgebraicLens' Flower Measurements
+measureNearest = listLens measurements classify
 
 flower1 :: Flower
 flower1 = Flower Versicolor (Measurements (V4 2 3 4 2))
@@ -51,14 +52,15 @@ mean :: [Float] -> Float
 mean [] =  0
 mean xs = sum xs / fromIntegral (length xs)
 
-compVectors :: (Applicative f, Algebraic f p) => Optic p Int (f Int) Int (f Int)
-compVectors = algebraic id (uncurry $ liftA2 (+))
+-- compVectors :: (Applicative f) => AlgebraicLens Int (f Int) Int (f Int)
+-- compVectors = algebraic pure _ (liftA2 (+))
 
-aggOnIndex :: Algebraic f p => (s -> a) -> Optic p s b a b
-aggOnIndex f = algebraic f snd
+aggOnIndex :: (s -> a) -> AlgebraicLens s b a b
+aggOnIndex f = listLens f (flip const)
 
 test :: IO ()
 test = do
+    print ()
     -- We can use a list-lens as a setter over a single element
     -- print $ flower1 & measureNearest . aggregate %~ negate
 
@@ -70,7 +72,7 @@ test = do
     -- print $ mean & (flowers >- measureNearest . aggregate)
     -- print $ flowers & (measureNearest . aggregate *% mean)
     -- print $ flowers & measureNearest . aggregate *% maximum . traceShowId
-    print . sequenceA $ [V2 1 2, V2 10 20, V2 100 200] & distribute' . compVectors *% const [2, 3, 4]
+    -- print . sequenceA $ [V2 1 2, V2 10 20, V2 100 200] & distribute' . compVectors *% const [2, 3, 4]
     -- print $ flower1 & measureNearest . aggregate %~ (+10)
     -- print $ flower1 ^. measureNearest . aggregate
     -- print $ [[1, 2, 3], [3, 4, 5]] & convolving *% mean

@@ -10,7 +10,6 @@ import Data.Profunctor.Sieve
 import Data.Profunctor.Strong
 import Proton.Types
 import Proton.Lens
-import Proton.Iso
 import Data.Profunctor.Rep
 
 
@@ -21,12 +20,15 @@ import Data.Profunctor
 import Data.Profunctor.Sieve
 import Data.Profunctor.Rep
 import Data.Foldable
-import Data.Profunctor.Applying
-import Data.Profunctor.Algebraic
+import Data.Profunctor.MStrong
+import Data.Profunctor.Reflector
 
 
-type Kaleidoscope s t a b = forall p. (Traversable (Corep p),  Corepresentable p) => p a b -> p s t
+type Kaleidoscope s t a b = forall p. Reflector p => p a b -> p s t
 type Kaleidoscope' s a = Kaleidoscope s s a a
+
+pointWise :: Kaleidoscope [a] [b] a b
+pointWise = dimap ZipList getZipList . reflected
 
 -- infixr 4 ?.
 -- (?.) :: (Foldable f) => f s -> Optic (Costar f) s t a b -> b -> t
@@ -54,15 +56,6 @@ infixr 4 *%
 infixr 4 .*
 (.*) :: Optic (Costar f) s t a b -> f s -> b -> t
 (.*) opt xs b = (runCostar $ opt (Costar (const b))) xs
-
-pointWise :: Kaleidoscope [a] [b] a b
-pointWise = iso ZipList getZipList . convolving
-
-cartesian :: Kaleidoscope [a] [b] a b
-cartesian = convolving
-
-convolving :: forall f a b. Applicative f => Kaleidoscope (f a) (f b) a b
-convolving p = cotabulate (fmap (cosieve p) . sequenceA)
 
 -- convolvingOf :: forall f a b. Applicative f => (Lens' (f a) a) -> Kaleidoscope' (f a) a
 -- convolvingOf l p = cotabulate (\tf -> _ tf . cosieve p . fmap (view l) $ tf)
