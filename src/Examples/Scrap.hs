@@ -54,6 +54,9 @@ mean xs = sum xs / fromIntegral (length xs)
 compVectors :: (Applicative f, Algebraic f p) => Optic p Int (f Int) Int (f Int)
 compVectors = algebraic id (uncurry $ liftA2 (+))
 
+aggOnIndex :: Algebraic f p => (s -> a) -> Optic p s b a b
+aggOnIndex f = algebraic f snd
+
 test :: IO ()
 test = do
     -- We can use a list-lens as a setter over a single element
