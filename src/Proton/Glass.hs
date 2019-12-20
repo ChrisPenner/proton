@@ -1,16 +1,37 @@
+{-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE TupleSections #-}
 module Proton.Glass where
 
 import Data.Profunctor
-import Control.Comonad
 import Data.Distributive
+import Control.Comonad
 
-class Glassy p where
-  glass :: (((s -> a) -> b) -> s -> t) -> p a b -> p s t
+-- class Glassy p where
+--   glass :: (((s -> a) -> b) -> s -> t) -> p a b -> p s t
 
-instance Glassy (->) where
-  glass glasser fab s = glasser go s
-    where
-      go sToA = fab $ sToA s
+class (Strong p, Closed p) => Glassed p where
+  glassed :: p a b -> p (t, u -> a) (t, u -> b)
+  glassed = second' . closed
+
+glass' :: forall p s t a b. Glassed p => (((s -> a) -> b) -> s -> t) -> p a b -> p s t
+glass' glasser p = dimap l r $ glassed p
+  where
+    l :: s -> (s, (s -> a) -> a)
+    l s = (s, ($ s))
+    r :: (s, (s -> a) -> b) -> t
+    r (s, f) = glasser f s
+
+-- Star
+-- (->)
+
+instance Glassed (->) where
+instance (Functor f, Distributive f) => Glassed (Star f) where
+-- instance Comonad f => Glassed (Costar f) where
+
+-- instance Comonad f => Strong (Costar f) where
+--   first' (Costar f) = (Costar (extract . extend (\x -> (, snd . extract $ x) $ f (fst <$> x))))
+
+
 
 -- instance Comonad f => Glassy (Costar f) where
 --   glass glasser (Costar fab) = Costar (\s -> extract $ fmap (glasser (go s)) s)
