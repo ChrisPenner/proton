@@ -5,12 +5,12 @@
 
 packages:
 - completed:
-    hackage: profunctors-5.4@sha256:545fdbc05131fa29e6612e915ec5d4dadfbcf3a6def86c8b95ca26593b21b259,2073
+    hackage: profunctors-5.5.1@sha256:48a53d69f997693db6b3fd339e92edea7776420ace5101737f037b04306096a7,2075
     pantry-tree:
       size: 1639
-      sha256: 7fed3fe32ae2f762046b1e0bcd0ef4fbe7d0189d2dee7d72459485b456c5738c
+      sha256: 92ffca6876a8304bcb76d1d98b4a31a422b33e96e84c87356adca87925e17856
   original:
-    hackage: profunctors-5.4@sha256:545fdbc05131fa29e6612e915ec5d4dadfbcf3a6def86c8b95ca26593b21b259,2073
+    hackage: profunctors-5.5.1@sha256:48a53d69f997693db6b3fd339e92edea7776420ace5101737f037b04306096a7,2075
 snapshots:
 - completed:
     size: 523448

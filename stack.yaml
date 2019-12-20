@@ -35,7 +35,7 @@ packages:
 # forks / in-progress versions pinned to a git hash. For example:
 #
 extra-deps:
-- profunctors-5.4@sha256:545fdbc05131fa29e6612e915ec5d4dadfbcf3a6def86c8b95ca26593b21b259,2073
+- profunctors-5.5.1@sha256:48a53d69f997693db6b3fd339e92edea7776420ace5101737f037b04306096a7,2075
 # - acme-missiles-0.3
 # - git: https://github.com/commercialhaskell/stack.git
 #   commit: e7b331f14bcffb8367cd58fbfc8b40ec7642100a

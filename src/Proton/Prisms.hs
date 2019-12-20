@@ -1,15 +1,19 @@
 module Proton.Prisms where
 
 import Data.Profunctor
-import Data.Tagged
-import Data.Maybe
-import Proton.Review
+import Proton.Types
 
 type Prism s t a b = forall p. Choice p => p a b -> p s t
 type Prism' s a = Prism s s a a
 
+dualPrism :: forall p s t a b. (Choice p, Cochoice p) => (s -> Either t a) -> (b -> Either a t) -> Optic p s t a b
+dualPrism l r p = lmap l . go $ rmap r p
+  where
+    go :: p a (Either a t) -> p (Either t a) t
+    go = undefined
+
 prism :: (b -> t) -> (s -> Either t a) -> Prism s t a b
-prism build split = rmap (either id build) . lmap split . right'
+prism build split = dimap split (either id build) . right'
 
 prism' :: (b -> s) -> (s -> Maybe a) -> Prism s s a b
 prism' build maybeGet = prism build (\s -> maybe (Left s) Right $ maybeGet s)

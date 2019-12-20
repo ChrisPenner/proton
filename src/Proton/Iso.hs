@@ -4,7 +4,6 @@ module Proton.Iso where
 import Data.Profunctor
 import Proton.Getter
 import Proton.Review
-import Proton.Setter
 
 type Iso s t a b = forall p. Profunctor p => p a b -> p s t
 type Iso' s a = Iso s s a a

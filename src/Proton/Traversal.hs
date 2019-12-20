@@ -9,13 +9,12 @@ import Data.Profunctor
 import Data.Profunctor.Rep
 import Data.Profunctor.Sieve
 import Data.Profunctor.Traversing
-import Data.Profunctor.Collapsable
 import Proton.Fold
 import Proton.Lens
 import Proton.Setter
 import Proton.Types
 
-type Traversal s t a b = forall p. (Collapsable p, Traversing p) => p a b -> p s t
+type Traversal s t a b = forall p. (Traversing p) => p a b -> p s t
 type Traversal' s a = forall p. Traversing p => p a a -> p s s
 
 traversed :: Traversable f => Traversal (f a) (f b) a b

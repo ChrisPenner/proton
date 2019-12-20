@@ -16,8 +16,8 @@ imgLayers = [ [0, 1, 0, 1]
             , [2, 3, 3, 2]
             ]
 
-done :: [Int]
-done = imgLayers & pointWise *% head . dropWhile (== 0)
+-- done :: [Int]
+-- done = imgLayers & pointWise *% head . dropWhile (== 0)
 
 -- selector :: (Ord k, Corep p ~ M.Map k, Corepresentable p) => Optic p s [Maybe s] s [k]
 -- selector = listLens id (\(m, k) -> flip M.lookup m <$> k)
@@ -33,6 +33,6 @@ back f = rmap f
 lookup'er :: Eq a => AlgebraicLens (a, b) (a, Maybe b) a a
 lookup'er = listLens fst (\xs i -> (i, lookup i xs))
 
-test :: IO ()
-test = do
-    print $ [([1, 2] , "one" :: String), ([10, 0], "two")] & lookup'er . pointWise *% maximum
+-- test :: IO ()
+-- test = do
+--     print $ [([1, 2] , "one" :: String), ([10, 0], "two")] & lookup'er . pointWise *% maximum
