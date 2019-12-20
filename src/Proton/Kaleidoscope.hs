@@ -1,13 +1,11 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-module Proton.Kaleidoscope (Reflector(..), Kaleidoscope, Kaleidoscope') where
+module Proton.Kaleidoscope (Reflector(..), Kaleidoscope, Kaleidoscope', pointWise) where
 
 -- ala http://events.cs.bham.ac.uk/syco/strings3-syco5/slides/roman.pdf
 -- https://cs.ttu.ee/events/nwpt2019/abstracts/paper14.pdf
 
 import Data.Profunctor
-import Proton.Types
-import Data.Profunctor.Rep
 import Control.Applicative
 import Data.Profunctor.Reflector
 

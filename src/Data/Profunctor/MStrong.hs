@@ -4,18 +4,7 @@ module Data.Profunctor.MStrong where
 
 import Data.Profunctor
 import Data.Tagged
-import Data.Profunctor.Rep
-import Data.Profunctor.Sieve
-import Data.Profunctor.Strong
-import Data.Foldable
-import Data.Functor.Identity
-import Data.Proxy
-import Control.Arrow
-import Control.Applicative
-import Data.Monoid
-import Data.Distributive
 import Data.Tuple
-import Proton.Types
 
 class Profunctor p => MStrong p where
   mfirst' ::  Monoid m => p a b -> p (a, m) (b, m)
@@ -38,7 +27,7 @@ instance MStrong Tagged where
   msecond' (Tagged b) = Tagged (mempty, b)
 
 instance Traversable f => MStrong (Costar f) where
-  msecond' (Costar f) = Costar (go f)
+  msecond' (Costar f) = Costar go
     where
-      go f fma = f <$> sequenceA fma
+      go fma = f <$> sequenceA fma
 

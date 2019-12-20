@@ -1,7 +1,6 @@
 module Proton.Setter where
 
 import Data.Profunctor
-import Data.Profunctor.Rep
 
 type Setter s t a b = (a -> b) -> (s -> t)
 type Setter' s a = Setter s s a a

@@ -4,33 +4,31 @@ module Proton.Fold where
 
 import Data.Profunctor
 import Data.Profunctor.Traversing
-import Data.Foldable
-import Data.Functor.Contravariant
+import Data.Profunctor.Phantom
 import Data.Monoid
+import Proton.Types
+import Data.Foldable
 
-import Proton.Getter
+type Fold s t a b = forall p. (Traversing p, Phantom p) => p a b -> p s t
 
+folding :: (Foldable f, Phantom p, Traversing p) => (s -> f a) -> p a b -> p s t
+folding f = phantom . lmap (toList . f) . traverse'
 
-type Fold r s t a b = Forget r a b -> Forget r s t
-
-folding :: (Foldable f, Traversing p, forall x. Functor (p x), forall x. Contravariant (p x)) => (s -> f a) -> p a b -> p s t
-folding f = to f . folded
-
-folded :: (Foldable f, Traversing p, forall x. Contravariant (p x), forall x. Functor (p x))
-       => p a b -> p (f a) (f b)
+folded :: (Traversing p, Foldable f, Phantom p)
+       => p a b -> p (f a) t
 folded = phantom . lmap toList . traverse'
 
-foldOf :: Fold a s t a b -> s -> a
+foldOf :: Monoid a => Fold s t a b -> s -> a
 foldOf f = runForget (f (Forget id))
 
-foldMapOf :: Fold m s t a b -> (a -> m) -> s -> m
+foldMapOf :: Monoid m => Optic (Forget m) s t a b -> (a -> m) -> s -> m
 foldMapOf f into = runForget (f (Forget into))
 
-toListOf :: Fold [a] s t a b -> s -> [a]
-toListOf fld = foldOf (fld . to pure)
+toListOf :: Fold s t a b -> s -> [a]
+toListOf fld = foldMapOf fld pure
 
-preview :: Fold (First a) s t a b -> s -> Maybe a
+preview :: Optic (Forget (First a)) s t a b -> s -> Maybe a
 preview fld = getFirst . foldMapOf fld (First . Just)
 
-(^?) :: s -> Fold (First a) s t a b -> Maybe a
+(^?) :: s -> Optic (Forget (First a)) s t a b -> Maybe a
 (^?) = flip preview

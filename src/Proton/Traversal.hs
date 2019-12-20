@@ -4,19 +4,18 @@ module Proton.Traversal where
 
 import Control.Applicative
 import Control.Monad.State
-import Data.Bifunctor.Flip
 import Data.Bitraversable
-import Data.Monoid
 import Data.Profunctor
 import Data.Profunctor.Rep
 import Data.Profunctor.Sieve
 import Data.Profunctor.Traversing
+import Data.Profunctor.Collapsable
 import Proton.Fold
 import Proton.Lens
 import Proton.Setter
 import Proton.Types
 
-type Traversal s t a b = forall p. Traversing p => p a b -> p s t
+type Traversal s t a b = forall p. (Collapsable p, Traversing p) => p a b -> p s t
 type Traversal' s a = forall p. Traversing p => p a a -> p s s
 
 traversed :: Traversable f => Traversal (f a) (f b) a b
@@ -39,23 +38,23 @@ beside t1 t2 p = tabulate go
     go rss = bitraverse (sieve $ t1 p) (sieve $ t2 p) rss
 
 
-unsafePartsOf :: forall s t a b. Traversal s t a b -> Lens s t [a] [b]
-unsafePartsOf t = lens getter setter
+unsafePartsOf :: forall s t a b. (forall p. p a b -> p s t) -> Lens s t [a] [b]
+unsafePartsOf t = lens getter setter'
   where
     getter :: s -> [a]
     getter = toListOf t
-    setter :: s -> [b] -> t
-    setter s bs = flip evalState bs $ traverseOf t insert s
+    setter' :: s -> [b] -> t
+    setter' s bs = flip evalState bs $ traverseOf t insert s
     insert :: x -> State [b] b
     insert _ = gets head <* modify tail
 
-partsOf :: forall s a. Traversal' s a -> Lens' s [a]
-partsOf t = lens getter setter
+partsOf :: forall s a. (forall p. p a a -> p s s) -> Lens' s [a]
+partsOf t = lens getter setter'
   where
     getter :: s -> [a]
     getter = toListOf t
-    setter :: s -> [a] -> s
-    setter s as =
+    setter' :: s -> [a] -> s
+    setter' s as =
         set (unsafePartsOf t) s (getZipList (ZipList as <|> ZipList (getter s)))
 
 -- taking :: forall s a p. Traversing p => Int -> Optic' p s a -> Optic' p s a

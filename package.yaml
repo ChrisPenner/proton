@@ -20,7 +20,7 @@ extra-source-files:
 description:         Please see the README on GitHub at <https://github.com/ChrisPenner/proton#readme>
 
 ghc-options:
-  - Wall
+  - -Wall
 
 default-extensions:
 - FlexibleInstances

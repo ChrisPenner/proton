@@ -2,14 +2,18 @@
 {-# LANGUAGE QuantifiedConstraints #-}
 module Proton.Getter where
 
-import Data.Functor.Contravariant
 import Data.Profunctor
+import Data.Profunctor.Phantom
 import Proton.Types
 
-type Getter s t a b = forall p. (forall x. Contravariant (p x), forall x. Functor (p x), Profunctor p) => p a b -> p s t
+type Getter s t a b = forall p. Phantom p => p a b -> p s t
 
 to :: (s -> a) -> Getter s t a b
 to f = phantom . lmap f
+
+-- Getter without Phantom requirement, may be useful with Grids/Grates
+to' :: Profunctor p => (s -> a) -> Optic p s b a b
+to' f = lmap f
 
 view :: Optic (Forget a) s t a b -> s -> a
 view g = runForget . g $ Forget id
