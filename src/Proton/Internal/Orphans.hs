@@ -1,4 +1,11 @@
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 module Proton.Internal.Orphans where
+
+import Data.Profunctor
+import Control.Comonad
+import Proton.Types
+
+
 
 
 -- Don't think this is useful for anything; but we can get a Strong instance for Costar

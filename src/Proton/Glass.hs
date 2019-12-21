@@ -1,6 +1,7 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE ConstraintKinds #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 module Proton.Glass where
 
 import Data.Profunctor
@@ -39,6 +40,16 @@ lensGlass lns = glass glasser
   where
     glasser :: ((s -> a) -> b) -> s -> t
     glasser gl s = set lns s (gl (view lns))
+
+extendOf :: (Comonad w) => Optic (Costar w) s t a b -> (w a -> b) -> w s -> w t
+extendOf gr f = extend (runCostar $ gr (Costar f))
+
+instance (Comonad w) => Strong (Costar w) where
+  first' :: forall a b c. Costar w a b -> Costar w (a, c) (b, c)
+  first' (Costar f) = Costar go
+    where
+      go :: (w (a, c) -> (b, c))
+      go wac = extract $ extendOf (lensGlass _1) f wac
 
 -- instance Comonad f => Glassed (Costar f) where
 
