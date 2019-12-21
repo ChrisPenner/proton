@@ -11,6 +11,7 @@ import Proton.Lens as P
 import Proton.Iso as P
 import Proton.Prisms as P
 import Proton.Kaleidoscope as P
+import Proton.Glass as P
 import Proton.Algebraic as P
 import Proton.Types as P
 import Data.Function as P ((&))

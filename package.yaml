@@ -37,6 +37,7 @@ default-extensions:
 - StandaloneDeriving
 - TemplateHaskell
 - RankNTypes
+- TypeFamilies
 
 dependencies:
 - base >= 4.7 && < 5

@@ -24,7 +24,7 @@ foldOf f = runForget (f (Forget id))
 foldMapOf :: Monoid m => Optic (Forget m) s t a b -> (a -> m) -> s -> m
 foldMapOf f into = runForget (f (Forget into))
 
-toListOf :: Fold s t a b -> s -> [a]
+toListOf :: Optic (Forget [a]) s t a b -> s -> [a]
 toListOf fld = foldMapOf fld pure
 
 preview :: Optic (Forget (First a)) s t a b -> s -> Maybe a
@@ -32,3 +32,6 @@ preview fld = getFirst . foldMapOf fld (First . Just)
 
 (^?) :: s -> Optic (Forget (First a)) s t a b -> Maybe a
 (^?) = flip preview
+
+(^..) :: s -> Optic (Forget [a]) s t a b -> [a]
+(^..) = flip toListOf
