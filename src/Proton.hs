@@ -10,6 +10,7 @@ import Proton.Review as P
 import Proton.Lens as P
 import Proton.Iso as P
 import Proton.Prisms as P
+import Proton.Coalgebraic as P
 import Proton.Kaleidoscope as P
 import Proton.Glass as P
 import Proton.Grate as P

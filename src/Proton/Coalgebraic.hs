@@ -2,7 +2,10 @@
 module Proton.Coalgebraic where
 
 import Proton.Types
+import Proton.Getter
 import Data.Profunctor
+import Proton.Algebraic
+import Proton.Prisms
 
 type Coalgebraic s t a b = forall p. MChoice p => Optic p s t a b
 type Coalgebraic' s a = Coalgebraic s s a a
@@ -30,5 +33,20 @@ instance Traversable f => MChoice (Costar f) where
   mright' :: forall a b m. Costar f a b -> Costar f (Either m a) (Either m b)
   mright' (Costar f) = (Costar (fmap f . sequenceA))
 
-coprism :: (m -> t) -> (b -> t) -> (s -> Either m a) -> Coalgebraic s t a b
-coprism project rev split =  dimap split (either project rev) . mright'
+coprism :: (b -> t) -> (s -> Either t a) -> Coalgebraic s t a b
+coprism rev split = dimap split (either id rev) . mright'
+
+coalgPrism :: Prism s t a b -> Coalgebraic s t a b
+coalgPrism pr = coprism (review pr) ()
+
+_Just' :: Coalgebraic (Maybe a) (Maybe b) a b
+_Just' = coprism Just match
+  where
+    match (Just a) = Right a
+    match Nothing = Left Nothing
+
+_Right' :: Coalgebraic (Either e a) (Either e b) a b
+_Right' = coprism Right match
+  where
+    match (Right a) = Right a
+    match (Left e) = Left (Left e)

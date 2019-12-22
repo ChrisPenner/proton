@@ -2,15 +2,16 @@ module Proton.Prisms where
 
 import Data.Profunctor
 import Proton.Types
+import Data.Market
 
 type Prism s t a b = forall p. Choice p => p a b -> p s t
 type Prism' s a = Prism s s a a
 
-dualPrism :: forall p s t a b. (Choice p, Cochoice p) => (s -> Either t a) -> (b -> Either a t) -> Optic p s t a b
-dualPrism l r p = lmap l . go $ rmap r p
-  where
-    go :: p a (Either a t) -> p (Either t a) t
-    go = undefined
+-- dualPrism :: forall p s t a b. (Choice p, Cochoice p) => (s -> Either t a) -> (b -> Either a t) -> Optic p s t a b
+-- dualPrism l r p = lmap l . go $ rmap r p
+--   where
+--     go :: p a (Either a t) -> p (Either t a) t
+--     go = undefined
 
 prism :: (b -> t) -> (s -> Either t a) -> Prism s t a b
 prism build split = dimap split (either id build) . right'
@@ -34,6 +35,13 @@ _Show :: (Read a, Show a) => Prism' String a
 _Show = prism show $ \s -> case reads s of
   [(a,"")] -> Right a
   _ -> Left s
+
+withPrism :: forall s t a b r. Prism s t a b -> ((b -> t) -> (s -> Either t a) -> r) -> r
+withPrism l f = case l (Market id Right) of
+  Market g h -> f g h
+
+matching :: Prism s t a b -> s -> Either t a
+matching p s = withPrism p (\_ match -> match s)
 
 -- outside :: Representable p => APrism s t a b -> Lens (p t r) (p s r) (p b r) (p a r)
 
