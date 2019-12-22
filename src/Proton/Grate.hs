@@ -5,7 +5,6 @@ import Data.Function ((&))
 import Data.Functor.Rep
 import Proton.Types
 import Data.Pair
-import Control.Comonad
 
 type Grate s t a b = forall p. Closed p => (p a b) -> (p s t)
 type Grate' s a = Grate s s a a

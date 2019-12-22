@@ -5,7 +5,7 @@ import Data.Profunctor
 import Data.Profunctor.Traversing
 import Proton.Types
 import Proton.Grate
-import Proton.Iso
+import Data.Pair
 
 type Grid s t a b = forall p. (Traversing p, Closed p) => Optic p s t a b
 type Grid' s a = Grid s s a a
