@@ -15,6 +15,7 @@ import Proton.Kaleidoscope as P
 import Proton.Glass as P
 import Proton.Grate as P
 import Proton.Algebraic as P
+import Proton.Achromatic as P
 import Proton.Types as P
 import Data.Function as P ((&))
 

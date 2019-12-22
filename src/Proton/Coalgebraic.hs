@@ -2,10 +2,9 @@
 module Proton.Coalgebraic where
 
 import Proton.Types
-import Proton.Getter
 import Data.Profunctor
-import Proton.Algebraic
 import Proton.Prisms
+import Proton.Review
 
 type Coalgebraic s t a b = forall p. MChoice p => Optic p s t a b
 type Coalgebraic' s a = Coalgebraic s s a a
@@ -37,16 +36,10 @@ coprism :: (b -> t) -> (s -> Either t a) -> Coalgebraic s t a b
 coprism rev split = dimap split (either id rev) . mright'
 
 coalgPrism :: Prism s t a b -> Coalgebraic s t a b
-coalgPrism pr = coprism (review pr) ()
+coalgPrism pr = coprism (review pr) (matching pr)
 
 _Just' :: Coalgebraic (Maybe a) (Maybe b) a b
-_Just' = coprism Just match
-  where
-    match (Just a) = Right a
-    match Nothing = Left Nothing
+_Just' = coalgPrism _Just
 
 _Right' :: Coalgebraic (Either e a) (Either e b) a b
-_Right' = coprism Right match
-  where
-    match (Right a) = Right a
-    match (Left e) = Left (Left e)
+_Right' = coalgPrism _Right
