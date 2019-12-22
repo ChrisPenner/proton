@@ -11,4 +11,3 @@ type Loop' s a = Loop s s a a
 loop :: forall p s t a b. Cochoice p 
      => (s -> a) -> (b -> Either a t) -> Optic p s t a b
 loop inject step = unright . dimap (either id inject) step
-

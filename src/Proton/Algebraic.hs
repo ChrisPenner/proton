@@ -7,8 +7,6 @@ module Proton.Algebraic
     , altLens
     , (>-)
     , (?.)
-    , extendOf
-    , (>>-)
     ) where
 
 import Data.Profunctor
@@ -17,7 +15,6 @@ import Proton.Types
 import Data.Monoid
 import Control.Applicative
 import Control.Arrow
-import Control.Comonad
 
 type AlgebraicLens s t a b = forall p. MStrong p => p a b -> p s t
 type AlgebraicLens' s a = AlgebraicLens s s a a
@@ -47,11 +44,3 @@ infixr 4 ?.
 infixr 4 >-
 (>-) :: Optic (Costar f) s t a b -> (f a -> b) -> f s -> t
 (>-) opt aggregator xs = (runCostar $ opt (Costar aggregator)) xs
-
-extendOf :: Comonad w => Optic (Costar w) s (w t) a (w b) -> (w a -> b) -> w s -> w t
-extendOf opt f = runCostar (opt (Costar (extend f)))
-
-infixr 4 >>-
-(>>-) :: Comonad w => Optic (Costar w) s (w t) a (w b) -> (w a -> b) -> w s -> w t
-(>>-) = extendOf
-

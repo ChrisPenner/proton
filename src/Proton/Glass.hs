@@ -1,18 +1,14 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE ConstraintKinds #-}
-{-# OPTIONS_GHC -fno-warn-orphans #-}
 module Proton.Glass where
 
 import Data.Profunctor
-import Data.Distributive
 import Control.Comonad
 import Proton.Types
 import Proton.Lens
 import Proton.Setter
 import Proton.Getter
-import Proton.Algebraic
-import Proton.Internal.Orphans
 
 type Glass s t a b = forall p. (Strong p, Closed p) => Optic p s t a b
 type Glass' s a = Glass s s a a
@@ -21,12 +17,8 @@ type Glass' s a = Glass s s a a
 --   glass :: (((s -> a) -> b) -> s -> t) -> p a b -> p s t
 
 type Glassed p = (Strong p, Closed p)
--- class (Strong p, Closed p) => Glassed p where
 glassed :: (Strong p, Closed p) => p a b -> p (t, u -> a) (t, u -> b)
 glassed = second' . closed
-
--- instance Glassed (->) where
--- instance (Functor f, Distributive f) => Glassed (Star f) where
 
 glass :: forall p s t a b. Glassed p => (((s -> a) -> b) -> s -> t) -> p a b -> p s t
 glass glasser p = dimap l r $ glassed p
@@ -41,6 +33,9 @@ lensGlass lns = glass glasser
   where
     glasser :: ((s -> a) -> b) -> s -> t
     glasser gl s = set lns s (gl (view lns))
+
+extendOf :: (Comonad w) => Optic (Costar w) s t a b -> (w a -> b) -> w s -> w t
+extendOf gr f = extend (runCostar $ gr (Costar f))
 
 -- instance Comonad f => Strong (Costar f) where
 --   first' (Costar f) = (Costar (extract . extend (\x -> (, snd . extract $ x) $ f (fst <$> x))))
@@ -64,9 +59,6 @@ lensGlass lns = glass glasser
 
 -- glass :: Comonad w => (((s -> a) -> b) -> s -> t) -> GrateLike w s t a b
 -- glass glasser f s = (glasser $ \h -> f (h <$> s)) $ extract s
-
-extendThrough :: (Comonad w) => Optic (Costar w) s t a b -> (w a -> b) -> w s -> w t
-extendThrough gr f = extend (runCostar $ gr (Costar f))
 
 -- Move this somewhere
 -- instance (Comonad w) => Strong (Costar w) where
