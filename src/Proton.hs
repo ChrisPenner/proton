@@ -2,6 +2,7 @@ module Proton (
     module P
     ) where
 
+import Data.Profunctor.Extraction as P
 import Proton.Achromatic as P
 import Proton.Algebraic as P
 import Proton.Coalgebraic as P
@@ -22,4 +23,3 @@ import Proton.Traversal as P
 import Proton.Types as P
 
 import Data.Function as P ((&))
-

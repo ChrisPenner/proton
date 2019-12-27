@@ -17,6 +17,9 @@ grate g = dimap (&) g . closed
 distributed :: (Closed p, Representable g) => p a b -> p (g a) (g b)
 distributed = dimap index tabulate . closed
 
+both :: Grate (a, a) (b, b) a b
+both = paired . distributed
+
 zipWithOf :: forall s t a b. Optic (Costar Pair) s t a b -> (a -> a -> b) -> s -> s -> t
 zipWithOf g f s1 s2 = zipFWithOf g (liftPair f) (Pair s1 s2)
 

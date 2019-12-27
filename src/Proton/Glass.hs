@@ -6,6 +6,7 @@ module Proton.Glass where
 import Data.Profunctor
 import Control.Comonad
 import Proton.Types
+import Proton.Internal.Orphans
 import Proton.Lens
 import Proton.Setter
 import Proton.Getter
@@ -17,7 +18,7 @@ type Glass' s a = Glass s s a a
 --   glass :: (((s -> a) -> b) -> s -> t) -> p a b -> p s t
 
 type Glassed p = (Strong p, Closed p)
-glassed :: (Strong p, Closed p) => p a b -> p (t, u -> a) (t, u -> b)
+glassed :: (Strong p, Closed p) => p a b -> p (s, u -> a) (s, u -> b)
 glassed = second' . closed
 
 glass :: forall p s t a b. Glassed p => (((s -> a) -> b) -> s -> t) -> p a b -> p s t
@@ -28,14 +29,20 @@ glass glasser p = dimap l r $ glassed p
     r :: (s, (s -> a) -> b) -> t
     r (s, f) = glasser f s
 
-lensGlass :: forall s t a b. Lens s t a b -> Glass s t a b
-lensGlass lns = glass glasser
+glassList :: forall a b. Glass [a] [b] a b
+glassList = glass go
   where
-    glasser :: ((s -> a) -> b) -> s -> t
-    glasser gl s = set lns s (gl (view lns))
+    go :: (([a] -> a) -> b) -> [a] -> [b]
+    go f s = undefined
 
 extendOf :: (Comonad w) => Optic (Costar w) s t a b -> (w a -> b) -> w s -> w t
 extendOf gr f = extend (runCostar $ gr (Costar f))
+
+traversed' :: forall f a b. Traversable f => Glass (f a) (f b) a b
+traversed' = glass go
+  where
+    go :: ((f a -> a) -> b) -> f a -> f b
+    go f fa = undefined
 
 -- instance Comonad f => Strong (Costar f) where
 --   first' (Costar f) = (Costar (extract . extend (\x -> (, snd . extract $ x) $ f (fst <$> x))))
