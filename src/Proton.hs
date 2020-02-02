@@ -14,12 +14,14 @@ import Proton.Grate as P
 import Proton.Grid as P
 import Proton.Iso as P
 import Proton.Kaleidoscope as P
+import Proton.Diffraction as P
 import Proton.Lens as P
 import Proton.Loop as P
 import Proton.Prisms as P
 import Proton.Review as P
 import Proton.Setter as P
 import Proton.Traversal as P
+import Proton.Indexed as P
 import Proton.Types as P
 
 import Data.Function as P ((&))
