@@ -50,9 +50,10 @@ dependencies:
 - bifunctors
 - mtl
 - containers
-- linear
 - tagged
 - comonad
+- compactable
+- linear
 
 library:
   source-dirs: src

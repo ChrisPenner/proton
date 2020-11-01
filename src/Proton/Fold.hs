@@ -35,3 +35,8 @@ preview fld = getFirst . foldMapOf fld (First . Just)
 
 (^..) :: s -> Optic (Forget [a]) s t a b -> [a]
 (^..) = flip toListOf
+
+(<+>) :: Semigroup r => Optic (Forget r) s t a b -> Optic (Forget r) s t' a b' -> Optic (Forget r) s t a b
+(fldA <+> fldB) p = 
+    case (fldA p, fldB (phantom p)) of
+        (Forget f, Forget g) -> Forget (\a -> f a <> g a)

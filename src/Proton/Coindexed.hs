@@ -48,8 +48,8 @@ vOver modifier f s = over (coindexing modifier) f s
 --     -- passThrough :: p (Either [a] (a, [a])) (Either [a] (a, [a]))
 --     passThrough = dimap _ _ $ right' p
 
-(^??) :: forall e s t a b p q. s -> Optical p q s t a b ->  Either e a
-(^??) s o = maybe (undefined) Right (s ^? (o @(Forget (First a)) @(Forget (First a))))
+-- (^??) :: forall e s t a b p q. s -> Optical p q s t a b ->  Either e a
+-- (^??) s o = maybe (undefined) Right (s ^? (o @(Forget (First a)) @(Forget (First a))))
 
 vFirst :: forall p a. Traversing p => p a a -> Coindexed String p [a] [a]
 vFirst p = Coindexed (wander go p)

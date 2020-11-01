@@ -11,9 +11,16 @@ packages:
       sha256: 92ffca6876a8304bcb76d1d98b4a31a422b33e96e84c87356adca87925e17856
   original:
     hackage: profunctors-5.5.1@sha256:48a53d69f997693db6b3fd339e92edea7776420ace5101737f037b04306096a7,2075
+- completed:
+    hackage: compactable-0.1.2.3@sha256:1dccae8bcf6aa4cfd01e2fd0ec36c98d6efdd3247b6ab1a49a7cfdede4d27d95,1707
+    pantry-tree:
+      size: 275
+      sha256: ffbb73c57e16e3cf2d943a47bed42dd949648fca934715bcd1a3fb93b715edcf
+  original:
+    hackage: compactable-0.1.2.3@sha256:1dccae8bcf6aa4cfd01e2fd0ec36c98d6efdd3247b6ab1a49a7cfdede4d27d95,1707
 snapshots:
 - completed:
-    size: 523448
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/14/1.yaml
-    sha256: 0045b9bae36c3bb2dd374c29b586389845af1557eea0423958d152fc500d4fbf
-  original: lts-14.1
+    size: 531932
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/16/7.yaml
+    sha256: 96ceeddd4fd68b2d430f7695a12eadefee760b7034c88c75d99d0f380f483068
+  original: lts-16.7

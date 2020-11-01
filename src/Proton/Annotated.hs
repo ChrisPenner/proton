@@ -1,6 +1,6 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-module Proton.Coindexed where
+module Proton.Annotated where
 
 import Data.Profunctor
 import Data.Profunctor.Traversing
