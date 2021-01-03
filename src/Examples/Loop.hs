@@ -50,9 +50,11 @@ accum check = loop initialize step . _1
             Nothing -> Right s
             Just (n', s') -> Left (n', s <> s')
 
-while ::
-  (Monoid state, Strong p, Cochoice p) =>
-  (t -> Bool) -> (t -> state) -> Optic p t state t t
-while continue inj = accum $ \x -> if continue x then Just (x, inj x)
-                                                    else Nothing
+while :: (Monoid state, Strong p, Cochoice p)
+      => (t -> Bool)
+      -> (t -> state)
+      -> Optic p t state t t
+while continue inj = accum $ \x -> if continue x
+    then Just (x, inj x)
+    else Nothing
 
