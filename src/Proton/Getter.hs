@@ -8,12 +8,12 @@ import Proton.Types
 
 type Getter s t a b = forall p. Phantom p => p a b -> p s t
 
-to :: (s -> a) -> Getter s t a b
-to f = phantom . lmap f
+to' :: (s -> a) -> Getter s t a b
+to' f = phantom . lmap f
 
 -- Getter without Phantom requirement, may be useful with Grids/Grates
-to' :: Profunctor p => (s -> a) -> Optic p s b a b
-to' f = lmap f
+to :: Profunctor p => (s -> a) -> Optic p s b a b
+to f = lmap f
 
 view :: Optic (Forget a) s t a b -> s -> a
 view g = runForget . g $ Forget id
@@ -22,7 +22,7 @@ views :: Optic (Forget a) s t a b -> (a -> a') -> s -> a'
 views g f = f . view g
 
 like :: a -> Getter s t a b
-like = to . const
+like = to' . const
 
 infixl 8 ^.
 (^.) ::  s -> Optic (Forget a) s t a b -> a

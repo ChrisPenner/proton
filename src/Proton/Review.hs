@@ -28,7 +28,7 @@ reviews :: (Tagged a b -> Tagged s t) -> (t -> t') -> b -> t'
 reviews r f = f . review r
 
 re :: (Tagged a b -> Tagged s t) -> Getter b a t s
-re r = to (review r)
+re r = to' (review r)
 
 unto :: forall (s :: *) t (a :: *) b. (b -> t) -> (Tagged a b -> Tagged s t)
 unto f = rmap f . retagged
