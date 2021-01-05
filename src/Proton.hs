@@ -23,5 +23,6 @@ import Proton.Setter as P
 import Proton.Traversal as P
 import Proton.Indexed as P
 import Proton.Types as P
+import Proton.Telescope as P
 
 import Data.Function as P ((&))

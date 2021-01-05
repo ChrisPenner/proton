@@ -30,6 +30,10 @@ filtered predicate = dimap partition (either id id) . left'
 traverseOf :: Optic (Star f) s t a b -> (a -> f b) -> s -> f t
 traverseOf t = runStar . t . Star
 
+infixr 4 %%~
+(%%~) :: Optic (Star f) s t a b -> (a -> f b) -> s -> f t
+(%%~) = traverseOf
+
 beside :: forall s t a b s' t' p r. (Representable p, Bitraversable r, Applicative (Rep p)) => Optic p s t a b -> Optic p s' t' a b -> Optic p (r s s') (r t t') a b
 beside t1 t2 p = tabulate go
   where
