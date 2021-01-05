@@ -1,6 +1,7 @@
 # proton - Profunctor optics
 
-An extremely experimental implementation of profunctor optics combinators. Mostly exists so I have a place to experiment with new ideas, but I like to think the result is pretty elegant.
+An **extremely experimental** implementation of profunctor optics in Haskell. 
+This mostly exists so I have a place to experiment with new ideas and new optics. Most things should work but I offer no performance guarantees.
 
 Not intended for use in production (yet).
 
@@ -24,4 +25,4 @@ Includes:
 * Feedbacks
 * Kaleidoscopes
 
-And still growing!
+And always growing!
