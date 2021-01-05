@@ -37,7 +37,7 @@ beside t1 t2 p = tabulate go
     go rss = bitraverse (sieve $ t1 p) (sieve $ t2 p) rss
 
 
-unsafePartsOf :: forall s t a b. (forall p. p a b -> p s t) -> Lens s t [a] [b]
+unsafePartsOf :: forall s t a b. (forall p. Traversing p => p a b -> p s t) -> Lens s t [a] [b]
 unsafePartsOf t = lens getter setter'
   where
     getter :: s -> [a]
@@ -47,7 +47,7 @@ unsafePartsOf t = lens getter setter'
     insert :: x -> State [b] b
     insert _ = gets head <* modify tail
 
-partsOf :: forall s a. (forall p. p a a -> p s s) -> Lens' s [a]
+partsOf :: forall s a. (forall p. Traversing p => p a a -> p s s) -> Lens' s [a]
 partsOf t = lens getter setter'
   where
     getter :: s -> [a]
@@ -56,21 +56,21 @@ partsOf t = lens getter setter'
     setter' s as =
         set (unsafePartsOf t) s (getZipList (ZipList as <|> ZipList (getter s)))
 
--- taking :: forall s a p. Traversing p => Int -> Optic' p s a -> Optic' p s a
--- taking n t = partsOf t . wander go
---   where
---     go :: Applicative f => (a -> f a) -> [a] -> f [a]
---     go handler as =
---       case splitAt n as of
---         (prefix, suffix) -> liftA2 (<>) (traverse handler prefix) (pure suffix)
+taking :: forall q s a. Traversing q => Int -> (forall p. Traversing p => p a a -> p s s) -> Optic' q s a
+taking n t = partsOf t . wander go
+  where
+    go :: forall f x. Applicative f => (x -> f x) -> [x] -> f [x]
+    go handler as =
+      case splitAt n as of
+        (prefix, suffix) -> liftA2 (<>) (traverse handler prefix) (pure suffix)
 
--- dropping :: forall s a. Int -> Traversal' s a -> Traversal' s a
--- dropping n t = partsOf t . wander go
---   where
---     go :: Applicative f => (a -> f a) -> [a] -> f [a]
---     go handler as =
---       case splitAt n as of
---         (prefix, suffix) -> liftA2 (<>) (pure prefix) (traverse handler as)
+dropping :: forall s a. Int -> Traversal' s a -> Traversal' s a
+dropping n t = partsOf t . wander go
+  where
+    go :: Applicative f => (a -> f a) -> [a] -> f [a]
+    go handler as =
+      case splitAt n as of
+        (prefix, suffix) -> liftA2 (<>) (pure prefix) (traverse handler suffix)
 
 
 -- failing :: (forall p. Traversing p => p a b -> p s t) -> (forall p. Traversing p => p a b -> p s t) -> (Traversing p => p a b -> p s t)
@@ -78,6 +78,4 @@ partsOf t = lens getter setter'
     -- _ $ traverse' @_ @[] p
 
 -- both
--- taking
--- dropping
 -- failing ()
