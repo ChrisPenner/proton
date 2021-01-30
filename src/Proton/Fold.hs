@@ -1,5 +1,7 @@
 {-# LANGUAGE QuantifiedConstraints #-}
 {-# LANGUAGE InstanceSigs #-}
+
+{-# LANGUAGE ImpredicativeTypes #-}
 module Proton.Fold where
 
 import Data.Profunctor

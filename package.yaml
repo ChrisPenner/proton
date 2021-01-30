@@ -54,6 +54,8 @@ dependencies:
 - comonad
 - compactable
 - linear
+- async
+- folds
 
 library:
   source-dirs: src

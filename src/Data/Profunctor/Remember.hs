@@ -2,6 +2,7 @@ module Data.Profunctor.Remember where
 
 import Data.Profunctor
 
+-- This is just Tagged + Closed, so it doesn't add anything new.
 newtype Remember r a b = Remember (r -> b)
   deriving Functor
 
