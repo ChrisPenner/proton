@@ -14,7 +14,6 @@ import Data.Profunctor.Yoneda
 import Data.Profunctor.Ran
 import Data.Profunctor.Composition
 
-import Data.Tagged
 import Data.Bifunctor.Biff
 import Data.Bifunctor.Tannen
 import Data.Bifunctor.Joker
@@ -22,34 +21,38 @@ import Data.Bifunctor.Product
 import Control.Applicative hiding (WrappedArrow(..))
 
 
-type ProfunctorArrow p = (C.Category p, Strong p)
-
-arr :: ProfunctorArrow p => (a -> b) -> p a b
+arr :: (Profunctor p, C.Category p) => (a -> b) -> p a b
 arr f = rmap f C.id
 
 -- | Split the input between the two argument profunctors and combine their output.
-(***) :: ProfunctorArrow p => p b c -> p b' c' -> p (b, b') (c, c')
+(***) :: (C.Category p, Strong p) => p b c -> p b' c' -> p (b, b') (c, c')
 l *** r = first' l C.. second' r
 
 -- | Fanout: send the input to both argument arrows and combine their output.
-(&&&) :: ProfunctorArrow p => p b c -> p b c' -> p b (c, c')
+(&&&) :: (C.Category p, Strong p) => p b c -> p b c' -> p b (c, c')
 l &&& r =  lmap (\x -> (x, x)) (l *** r)
 
 -- | Precomposition with a pure function.
-(^>>) :: ProfunctorArrow p => (b -> c) -> p c d -> p b d
+(^>>) :: (Profunctor p, C.Category p) => (b -> c) -> p c d -> p b d
 f ^>> p = arr f C.>>> p
 
 -- | Postcomposition with a pure function.
-(>>^) :: ProfunctorArrow p => p b c -> (c -> d) -> p b d
+(>>^) :: (Profunctor p, C.Category p) => p b c -> (c -> d) -> p b d
 p >>^ f = p C.>>> arr f
 
 -- | Precomposition with a pure function (right-to-left variant).
-(<<^) :: ProfunctorArrow p => p c d -> (b -> c) -> p b d
+(<<^) :: (Profunctor p, C.Category p) => p c d -> (b -> c) -> p b d
 p <<^ f = p C.<<< arr f
 
 -- | Postcomposition with a pure function (right-to-left variant).
-(^<<) :: ProfunctorArrow p => (c -> d) -> p b c -> p b d
+(^<<) :: (Profunctor p, C.Category p) => (c -> d) -> p b c -> p b d
 f ^<< p = arr f C.<<< p
+
+(+++) :: (Choice p, C.Category p) => p b c -> p b' c' -> p (Either b b') (Either c c')
+l +++ r = left' l C.<<< right' r
+
+(|||) :: (Choice p, C.Category p) => p b d -> p c d -> p (Either b c) d
+l ||| r = rmap (either id id) (l +++ r)
 
 class Profunctor p => ProfunctorZero p where
   zeroProfunctor :: p a b
