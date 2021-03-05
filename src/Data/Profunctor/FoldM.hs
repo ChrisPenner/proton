@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE GADTs #-}
-module FoldM where
+module Data.Profunctor.FoldM where
 import Data.Profunctor
 
 -- https://hackage.haskell.org/package/foldl-1.4.10/docs/Control-Foldl.html#t:FoldM

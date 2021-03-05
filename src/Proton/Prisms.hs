@@ -1,7 +1,6 @@
 module Proton.Prisms where
 
 import Data.Profunctor
-import Proton.Types
 import Data.Market
 
 type Prism s t a b = forall p. Choice p => p a b -> p s t

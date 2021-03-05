@@ -49,6 +49,7 @@ dependencies:
 - adjunctions
 - bifunctors
 - mtl
+- transformers
 - containers
 - tagged
 - comonad

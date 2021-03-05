@@ -15,3 +15,8 @@ join'' = tabulate . rmap join . sieve . strong (&) . rmap sieve
 
 absorb :: (Representable p, m ~ Rep p, Monad m) => p a (m b) -> p a b
 absorb = tabulate . fmap join . sieve
+
+newtype Dub p f a b = Dub (p (f a) (f b))
+
+instance (Profunctor p, Functor f) => Profunctor (Dub p f) where
+  dimap f g (Dub p) = Dub (dimap (fmap f) (fmap g) p)
