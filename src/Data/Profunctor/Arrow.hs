@@ -108,6 +108,57 @@ instance  (Profunctor p, ProfunctorZero q) => ProfunctorZero (Rift p q) where
 instance  (ProfunctorZero p, Functor f, Functor g) => ProfunctorZero (Biff p f g) where
   zeroProfunctor = Biff zeroProfunctor
 
+class Profunctor p => ProfunctorPlus p where
+  (<+>) :: p a b -> p a b -> p a b
+
+instance Alternative f => ProfunctorPlus (Star f) where
+  Star f <+> Star g = Star (liftA2 (<|>) f g)
+
+instance (Monad m, Alternative m) => ProfunctorPlus (Arr.Kleisli m) where
+  Arr.Kleisli f <+> Arr.Kleisli g = Arr.Kleisli (liftA2 (<|>) f g)
+
+instance Monoid r => ProfunctorPlus (Forget r) where
+  Forget f <+> Forget g = Forget (liftA2 (<>) f g)
+
+instance (Applicative f, ProfunctorPlus p) => ProfunctorPlus (Cayley f p) where
+  Cayley f <+> Cayley g = Cayley (liftA2 (<+>) f g)
+
+instance (Applicative f, ProfunctorPlus p) => ProfunctorPlus (Tannen f p) where
+  Tannen f <+> Tannen g = Tannen (liftA2 (<+>) f g)
+
+instance (ProfunctorPlus p) => ProfunctorPlus (Tambara p) where
+  Tambara f <+> Tambara g = Tambara (f <+> g)
+
+instance (ProfunctorPlus p) => ProfunctorPlus (Closure p) where
+  Closure f <+> Closure g = Closure (f <+> g)
+
+instance (ProfunctorPlus p) => ProfunctorPlus (TambaraSum p) where
+  TambaraSum f <+> TambaraSum g = TambaraSum (f <+> g)
+
+instance (ProfunctorPlus p) => ProfunctorPlus (CofreeTraversing p) where
+  CofreeTraversing f <+> CofreeTraversing g = CofreeTraversing (f <+> g)
+
+instance (ProfunctorPlus p) => ProfunctorPlus (CofreeMapping p) where
+  CofreeMapping f <+> CofreeMapping g = CofreeMapping (f <+> g)
+
+instance Alternative f => ProfunctorPlus (Joker f) where
+  Joker f <+> Joker g = Joker (f <|> g)
+
+instance Arr.ArrowPlus p => ProfunctorPlus (WrappedArrow p) where
+  WrapArrow f <+> WrapArrow g = WrapArrow (f Arr.<+> g)
+
+instance ProfunctorPlus p => ProfunctorPlus (Codensity p) where
+  Codensity f <+> Codensity g = Codensity (liftA2 (<+>) f g)
+
+instance (ProfunctorPlus p, ProfunctorPlus q) => ProfunctorPlus (Product p q) where
+  Pair fl fr <+> Pair gl gr = Pair (fl <+> gl) (fr <+> gr)
+
+instance  (Profunctor p, ProfunctorPlus q) => ProfunctorPlus (Rift p q) where
+  Rift f <+> Rift g = Rift (liftA2 (<+>) f g)
+
+instance  (ProfunctorPlus p, Functor f, Functor g) => ProfunctorPlus (Biff p f g) where
+  Biff f <+> Biff g = Biff (f <+> g)
+
 class Profunctor p => ProfunctorApply p where
   app :: p (p a b, a) b
 
