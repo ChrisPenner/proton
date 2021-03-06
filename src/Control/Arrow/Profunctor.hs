@@ -1,6 +1,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE DerivingStrategies #-}
-module Control.Arrow.Profuncto where
+module Control.Arrow.Profunctor where
 
 import Data.Profunctor
 import qualified Data.Profunctor.Arrow as PA
@@ -9,7 +9,7 @@ import qualified Control.Category as C
 import Data.Coerce
 import Data.Bifunctor
 
-newtype WrappedProfunctor p a b = WrappedProfunctor (p a b)
+newtype WrappedProfunctor p a b = WrappedProfunctor {unwrapProfunctor :: p a b}
   deriving newtype C.Category
 
 instance (Profunctor p, C.Category p, Strong p) => Arr.Arrow (WrappedProfunctor p) where
