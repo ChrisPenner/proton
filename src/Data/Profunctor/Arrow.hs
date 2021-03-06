@@ -108,7 +108,7 @@ instance  (Profunctor p, ProfunctorZero q) => ProfunctorZero (Rift p q) where
 instance  (ProfunctorZero p, Functor f, Functor g) => ProfunctorZero (Biff p f g) where
   zeroProfunctor = Biff zeroProfunctor
 
-class Profunctor p => ProfunctorPlus p where
+class ProfunctorZero p => ProfunctorPlus p where
   (<+>) :: p a b -> p a b -> p a b
 
 instance Alternative f => ProfunctorPlus (Star f) where
