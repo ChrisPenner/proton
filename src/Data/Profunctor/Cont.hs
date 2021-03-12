@@ -1,28 +1,16 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE TupleSections #-}
+{-# LANGUAGE BlockArguments #-}
 module Data.Profunctor.Cont where
 
 -- Profunctor experiments on continuations
 
 import Data.Profunctor
-import Data.Profunctor.Rep
-import Data.Profunctor.Sieve
--- import Control.Monad.Trans.Cont
--- import Control.Monad.Trans.Class
-import Data.Foldable
-import Data.Traversable
-import Data.Monoid
-import Control.Applicative
 import Data.Profunctor.Arrow
 import Data.Function
 import qualified Control.Category as C
 import Control.Category ((>>>))
 import Data.Void
--- ContT r m a :: (a -> m r) -> m r
--- shiftT :: ((a -> m r) -> ContT r m r) -> ContT r m a
--- shiftT :: ((a -> m r) -> (r -> m r) -> m r) -> (a -> m r) -> m r
-
-import Data.Functor.Identity
-
 
 data ContP r a b =
     ContP {runContP :: a -> ((b -> r) -> r) }
@@ -36,13 +24,17 @@ instance C.Category (ContP r) where
 instance Profunctor (ContP r) where
   dimap l r (ContP f) = fmap r $ ContP (\a cr -> f (l a) cr)
 
+instance ProfunctorApply (ContP r) where
+  app = ContP \(ContP aBrR, a) br -> aBrR a br
+
 class Profunctor p => ProfunctorCont p where
   -- callCC :: (p a b -> p x a) -> p x a
   -- callCC :: (p a x -> p a (Either x b)) -> p a b
   -- callCC :: (p (Either a a) x -> p a x) -> p a a
   -- callCC :: (p (Either b x) x -> p a b) -> p a b
   -- callCC :: (p b x -> p a b) -> p a b
-  callCC :: p ((a -> p q b) -> p q a, q) a
+  -- callCC :: p ((a -> p q b) -> p q a, q) a
+  callCC :: (p a b -> p x a) -> p x a
 
 instance Choice (ContP r) where
   right' (ContP f) = ContP $ \eCA eCBR ->
@@ -50,38 +42,45 @@ instance Choice (ContP r) where
           Left c -> eCBR (Left c)
           Right a -> f a (eCBR . Right)
 
+instance Strong (ContP r) where
+  first' (ContP aBrR) = ContP \(a, c) bcr -> aBrR a (bcr . (,c))
+
 instance ProfunctorCont (ContP r) where
-  callCC = callCC'
+  callCC f = ContP \q ar ->
+    let ContP x = f $ ContP \a _ -> ar a
+     in x q ar
 
 evalContP :: ContP r a r -> a -> r
 evalContP (ContP f) a = f a id
 
-neutralize :: ContP r r x
-neutralize = ContP (\r _ -> r)
-
 reset :: ContP r a r -> ContP r' a r
-reset  = liftP . evalContP
+reset  = arr . evalContP
 
 shift :: ContP r (ContP r (a -> r) r) a
 shift = ContP (evalContP)
 
-callCC' :: ContP r ((a -> ContP r q b) -> ContP r q a, q) a
-callCC' = ContP $ \(f,q) c ->
-    let (ContP z) = f (\x -> ContP $ \_ _ -> c x)
-     in z q c
-
-liftP :: (a -> b) -> ContP r a b
-liftP f = ContP (\a br -> br (f a))
-
+neutralize :: ContP r r x
+neutralize = ContP (\r _ -> r)
 
 testP :: ContP String Int Int -- ContP String Int Int
--- testP = callCC catcher >>> arr succ >>>  arr succ >>> arr succ
 testP = catcher >>> arr succ >>>  arr succ >>> arr succ
   where
-    -- catcher :: ContP String Int Void -> ContP String Int Int
-    -- catcher p = dimap (\n -> if even n then Right n else Left n) (either absurd id) (p +++ C.id)
     catcher :: ContP String Int Int
     catcher = dimap (\n -> if even n then Right n else Left n) (either absurd id) (lmap show neutralize +++ C.id)
+
+testP'' :: ContP String Int Int
+testP'' = callCC \cc ->
+    catcher cc >>> arr succ >>> arr succ >>> arr succ
+  where
+    catcher :: ContP String Int Int -> ContP String Int Int
+    catcher p = dimap (splitPred even) unify (p +++ C.id)
+
+splitPred :: (a -> Bool) -> a -> Either a a
+splitPred predicate a = (if predicate a then Right a else Left a)
+
+unify :: Either a a -> a
+unify = either id id
+
 
 -- helper :: (a -> Bool) -> [a] -> ContT r f (Maybe a)
 -- helper predicate xs = do
