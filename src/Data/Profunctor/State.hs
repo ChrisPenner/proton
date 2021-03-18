@@ -16,4 +16,8 @@ instance (Category p) => Category (StateT s p) where
   StateT s . StateT t = StateT (s C.. t)
 
 instance (Category p, Profunctor p) => ProfunctorState s (StateT s p) where
-  state f = StateT (lmap f C.id)
+  state (StateT p) = StateT (dimap (\(a, s) -> ((a, s), s)) fst p)
+
+instance (Profunctor p) => ProfunctorState' s (StateT s p) where
+  get' (StateT p) = StateT (lmap (\(a, s) -> ((a, s), s)) p)
+  put' (StateT p) = StateT (rmap fst p)
