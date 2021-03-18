@@ -34,19 +34,19 @@ l &&& r =  lmap (\x -> (x, x)) (l *** r)
 
 -- | Precomposition with a pure function.
 (^>>) :: (Profunctor p, C.Category p) => (b -> c) -> p c d -> p b d
-f ^>> p = arr f C.>>> p
+f ^>> p = lmap f p
 
 -- | Postcomposition with a pure function.
 (>>^) :: (Profunctor p, C.Category p) => p b c -> (c -> d) -> p b d
-p >>^ f = p C.>>> arr f
+p >>^ f = rmap f p
 
 -- | Precomposition with a pure function (right-to-left variant).
 (<<^) :: (Profunctor p, C.Category p) => p c d -> (b -> c) -> p b d
-p <<^ f = p C.<<< arr f
+p <<^ f = lmap f p
 
 -- | Postcomposition with a pure function (right-to-left variant).
 (^<<) :: (Profunctor p, C.Category p) => (c -> d) -> p b c -> p b d
-f ^<< p = arr f C.<<< p
+f ^<< p = rmap f p
 
 (+++) :: (Choice p, C.Category p) => p b c -> p b' c' -> p (Either b b') (Either c c')
 l +++ r = left' l C.<<< right' r

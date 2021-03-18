@@ -5,6 +5,7 @@ module Data.Profunctor.MStrong where
 import Data.Profunctor
 import Data.Tagged
 import Data.Tuple
+import Data.Foldable
 
 class Profunctor p => MStrong p where
   mfirst' ::  Monoid m => p a b -> p (a, m) (b, m)
@@ -26,8 +27,5 @@ instance Functor f => MStrong (Star f) where
 instance MStrong Tagged where
   msecond' (Tagged b) = Tagged (mempty, b)
 
-instance Traversable f => MStrong (Costar f) where
-  msecond' (Costar f) = Costar go
-    where
-      go fma = f <$> sequenceA fma
-
+instance (Functor f, Foldable f) => MStrong (Costar f) where
+  msecond' (Costar f) = Costar (\fma -> (fold (fmap fst fma), f (fmap snd fma)))
