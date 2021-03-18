@@ -24,6 +24,7 @@ ghc-options:
 
 default-extensions:
 - FlexibleInstances
+- MultiParamTypeClasses
 - FlexibleContexts
 - ScopedTypeVariables
 - LambdaCase
