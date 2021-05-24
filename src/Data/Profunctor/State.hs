@@ -1,4 +1,4 @@
-module Data.Profunctor.StateT where
+module Data.Profunctor.State where
 
 import Data.Profunctor
 import Control.Category (Category)

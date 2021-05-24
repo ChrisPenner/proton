@@ -19,7 +19,7 @@ instance (Category p, Strong p) => Category (ReaderT r p) where
 instance (Profunctor p, Category p) => ProfunctorReader r (ReaderT r p) where
   ask = ReaderT C.id
   reader f = rmap (uncurry $ flip f) ask
-  local = _
+  local f (ReaderT q) = ReaderT (lmap (second f) q)
 
 instance (Profunctor p) => ProfunctorReader' r (ReaderT r p) where
   ask' (ReaderT p) = ReaderT $ lmap (\(a, r) -> ((a, r), r)) p
